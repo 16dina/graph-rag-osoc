@@ -1,0 +1,6 @@
+[
+    {
+        "user_question": "Wat waren de laatste 10 beslissingen met betrekking tot het milieu in Gent?",
+        "sparql_query": "PREFIX prov: <http://www.w3.org/ns/prov#> PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#> PREFIX eli: <http://data.europa.eu/eli/ontology#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX oa: <http://www.w3.org/ns/oa#> SELECT ?annotation ?target ?title ?motivering (GROUP_CONCAT(?value; separator=', ') AS ?values) ?description ?date ?derivedFrom WHERE { ?annotation oa:hasBody <http://stad.gent/id/concepts/gent_words/310> ; oa:hasTarget ?target . ?target eli:title ?title ; besluit:motivering ?motivering ; prov:value ?value ; eli:description ?description ; eli:date_publication ?date ; prov:wasDerivedFrom ?derivedFrom . } LIMIT 10"
+    }
+]

@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 import re
 
-# openai_api_key = st.secrets['OPENAI_API_KEY']
+openai_api_key = st.secrets['OPENAI_API_KEY']
 endpoint_url = "https://probe.stad.gent/sparql"
 
 # with st.sidebar:

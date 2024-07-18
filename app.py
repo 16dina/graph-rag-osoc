@@ -51,7 +51,9 @@ def generate_sparql_query(user_question, label_data, examples_data):
     User Question: {user_question}
     SPARQL Query:
 
-    But please make sure to use the URIs of the chosen labels in the "?annotation oa:hasBody" part of the query like in the examples. 
+    But please make sure to use the URIs of the chosen labels in the "?annotation oa:hasBody" part of the query like in the examples.
+    
+    If the user doesn't set a limit to the number of decisions they want to see, limit them to 5.
     
     If there is more than one URI, you can separate them with a comma.
     

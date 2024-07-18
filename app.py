@@ -147,7 +147,7 @@ if prompt := st.chat_input():
                 cleaned_decision[key] = cleaned_value
             cleaned_decisions.append(cleaned_decision)
 
-        return cleaned_decision
+        return cleaned_decisions
 
     cleaned_decisions = run_query(query_content_no_newlines)
 

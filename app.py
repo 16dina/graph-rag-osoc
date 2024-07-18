@@ -28,6 +28,7 @@ def generate_sparql_query(user_question, label_data, examples_data):
     )
 
     prompt = f"""
+
     GIVE ONLY THE QUERY AS AN ANSWER TO THE FOLLOWING PROMPT:
 
     The following are all the labels for the decisions in the decisions dataset and their URIs:
@@ -174,6 +175,8 @@ if prompt := st.chat_input():
         resources_names.append(d['title'])
 
     prompt_2 = f"""
+    If the user's prompt is not a question, chat normally. If it is a question do the following:
+
     The following is the question the user asked:
 
     {user_question}

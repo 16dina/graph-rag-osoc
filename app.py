@@ -76,8 +76,8 @@ def generate_sparql_query(user_question, label_data, examples_data):
 def check_sparql_query(query):
 
     prompt = f"""
-    If the query generated {query} contains looking for keywords, generate the same SPARQL query without looking at keywords.
-    Don't add '`' as you wish.
+    If the query generated {query} contains looking for keywords, generate the same SPARQL query but remove the keywords filtering.
+    Don't add '`' to the query as you wish.
     """
     response_2 = client.chat.completions.create(
             model="gpt-3.5-turbo",
@@ -90,6 +90,35 @@ def check_sparql_query(query):
         )
 
     return response_2
+
+def run_query(query):
+        headers = {
+            "Accept": "application/sparql-results+json"
+        }
+        params = {
+            "query": query
+        }
+
+        response = requests.get(endpoint_url, headers=headers, params=params)
+        if response.status_code == 200:
+            results = response.json()
+            print(f"Results for question '{user_question}':", results)
+        else:
+            print(f"Failed to execute query for question '{user_question}':", response.status_code)
+        
+        results_content = results['results']['bindings']
+
+        cleaned_decisions = []
+
+        for decision in results_content:
+            cleaned_decision = {}
+            for key, detail in decision.items():
+                # Extract the value and remove any \n or extra spaces
+                cleaned_value = re.sub(r'\s+', ' ', detail['value']).strip()
+                cleaned_decision[key] = cleaned_value
+            cleaned_decisions.append(cleaned_decision)
+
+        return cleaned_decisions
 
 st.title("💬 Chatbot")
 st.caption("🚀 A Streamlit chatbot powered by OpenAI")
@@ -120,45 +149,16 @@ if prompt := st.chat_input():
 
     # print(sparql_query)
 
-    def run_query(query):
-        headers = {
-            "Accept": "application/sparql-results+json"
-        }
-        params = {
-            "query": query
-        }
-
-        response = requests.get(endpoint_url, headers=headers, params=params)
-        if response.status_code == 200:
-            results = response.json()
-            print(f"Results for question '{user_question}':", results)
-        else:
-            print(f"Failed to execute query for question '{user_question}':", response.status_code)
-        
-        results_content = results['results']['bindings']
-
-        cleaned_decisions = []
-
-        for decision in results_content:
-            cleaned_decision = {}
-            for key, detail in decision.items():
-                # Extract the value and remove any \n or extra spaces
-                cleaned_value = re.sub(r'\s+', ' ', detail['value']).strip()
-                cleaned_decision[key] = cleaned_value
-            cleaned_decisions.append(cleaned_decision)
-
-        return cleaned_decisions
-
     cleaned_decisions = run_query(query_content_no_newlines)
 
     if not cleaned_decisions:
-        sparql_query = check_sparql_query(query_content_no_newlines)
-        query_content = sparql_query.choices[0].message.content
+        sparql_query_2 = check_sparql_query(query_content_no_newlines)
+        query_content_2 = sparql_query_2.choices[0].message.content
         prefix_position = query_content.find("PREFIX")
         if prefix_position != -1:
-            query_content = query_content[prefix_position:]
+            query_content_2 = query_content_2[prefix_position:]
 
-        query_content_no_newlines_2 = query_content.replace("\n", " ")
+        query_content_no_newlines_2 = query_content_2.replace("\n", " ")
 
         cleaned_decisions = run_query(query_content_no_newlines_2)
 

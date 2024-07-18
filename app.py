@@ -73,6 +73,24 @@ def generate_sparql_query(user_question, label_data, examples_data):
 
     return response
 
+def check_sparql_query(query):
+
+    prompt = f"""
+    If the query generated {query} contains looking for keywords, generate the same SPARQL query without looking at keywords.
+    Don't add '`' as you wish.
+    """
+    response_2 = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a SPARQL query refiner."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=1000,
+            temperature=0
+        )
+
+    return response_2
+
 st.title("💬 Chatbot")
 st.caption("🚀 A Streamlit chatbot powered by OpenAI")
 if "messages" not in st.session_state:
@@ -102,37 +120,54 @@ if prompt := st.chat_input():
 
     # print(sparql_query)
 
-    headers = {
-        "Accept": "application/sparql-results+json"
-    }
-    params = {
-        "query": query_content_no_newlines
-    }
+    def run_query(query):
+        headers = {
+            "Accept": "application/sparql-results+json"
+        }
+        params = {
+            "query": query_content_no_newlines
+        }
 
-    response = requests.get(endpoint_url, headers=headers, params=params)
-    if response.status_code == 200:
-        results = response.json()
-        print(f"Results for question '{user_question}':", results)
-    else:
-        print(f"Failed to execute query for question '{user_question}':", response.status_code)
-    
-    results_content = results['results']['bindings']
+        response = requests.get(endpoint_url, headers=headers, params=params)
+        if response.status_code == 200:
+            results = response.json()
+            print(f"Results for question '{user_question}':", results)
+        else:
+            print(f"Failed to execute query for question '{user_question}':", response.status_code)
+        
+        results_content = results['results']['bindings']
 
-    cleaned_decisions = []
-    resources = []
-    resources_names = []
+        cleaned_decisions = []
 
-    for decision in results_content:
-        cleaned_decision = {}
-        for key, detail in decision.items():
-            # Extract the value and remove any \n or extra spaces
-            cleaned_value = re.sub(r'\s+', ' ', detail['value']).strip()
-            cleaned_decision[key] = cleaned_value
-        cleaned_decisions.append(cleaned_decision)
+        for decision in results_content:
+            cleaned_decision = {}
+            for key, detail in decision.items():
+                # Extract the value and remove any \n or extra spaces
+                cleaned_value = re.sub(r'\s+', ' ', detail['value']).strip()
+                cleaned_decision[key] = cleaned_value
+            cleaned_decisions.append(cleaned_decision)
+
+        return cleaned_decision
+
+    cleaned_decisions = run_query(query_content_no_newlines)
+
+    if not cleaned_decisions:
+        sparql_query = check_sparql_query(query_content_no_newlines)
+        query_content = sparql_query.choices[0].message.content
+        prefix_position = query_content.find("PREFIX")
+        if prefix_position != -1:
+            query_content = query_content[prefix_position:]
+
+        query_content_no_newlines_2 = query_content.replace("\n", " ")
+
+        cleaned_decisions = run_query(query_content_no_newlines_2)
 
     # Print or use the cleaned_decisions as needed
     for d in cleaned_decisions:
         print(d)
+
+    resources = []
+    resources_names = []
 
     for d in cleaned_decisions:
         resources.append(d['derivedFrom'])

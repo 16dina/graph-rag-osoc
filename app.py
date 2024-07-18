@@ -140,6 +140,7 @@ if prompt := st.chat_input():
     user_question = prompt
 
     sparql_query = generate_sparql_query(user_question, label_data=label_data, examples_data=example_data)
+    print(sparql_query)
     query_content = sparql_query.choices[0].message.content
     prefix_position = query_content.find("PREFIX")
     if prefix_position != -1:
@@ -150,9 +151,11 @@ if prompt := st.chat_input():
     # print(sparql_query)
 
     cleaned_decisions = run_query(query_content_no_newlines)
+    print(cleaned_decisions)
 
     if not cleaned_decisions:
         sparql_query_2 = check_sparql_query(query_content_no_newlines)
+        print(sparql_query_2)
         query_content_2 = sparql_query_2.choices[0].message.content
         prefix_position = query_content.find("PREFIX")
         if prefix_position != -1:
@@ -161,6 +164,7 @@ if prompt := st.chat_input():
         query_content_no_newlines_2 = query_content_2.replace("\n", " ")
 
         cleaned_decisions = run_query(query_content_no_newlines_2)
+        print("again:", cleaned_decisions)
 
     # Print or use the cleaned_decisions as needed
     for d in cleaned_decisions:

@@ -125,7 +125,7 @@ if prompt := st.chat_input():
             "Accept": "application/sparql-results+json"
         }
         params = {
-            "query": query_content_no_newlines
+            "query": query
         }
 
         response = requests.get(endpoint_url, headers=headers, params=params)

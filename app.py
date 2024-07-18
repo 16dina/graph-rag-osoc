@@ -184,14 +184,14 @@ if prompt := st.chat_input():
 
     But before showing your answer to the user, check if it matches the user's question: {user_question}. If it relates but doesn't answer exactly mention that it might relate but isn't necessarily the answer.
 
-    Answer in the language the user asked in. Be sure to be friendly and explain in a way an ordinary person can understand. The language city officials use is often very different from the language citizens use (officials wind up speaking in departments and form numbers instead of needs in big organizations).
-
     Show the {resources} to the end-user so they can refer to them. Format the links where the {resources_names} are shown as links being {resources}.
 
     If you don't have any answer or potential resources from the decisions which are results of the query, don't refer to any external links (including the city of Gent's website).
 
     Don't show empty lists in your answer. 
     Use the word "besluiten" instead of "beslissingen".
+
+    IMPORTANT NOTE: Answer in the language the user asked in. Be sure to be friendly and explain in a way an ordinary person can understand. The language city officials use is often very different from the language citizens use (officials wind up speaking in departments and form numbers instead of needs in big organizations).
     """
 
     completion_2 = client.chat.completions.create(

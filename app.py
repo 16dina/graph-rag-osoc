@@ -4,14 +4,14 @@ import requests
 import streamlit as st
 import re
 
-openai_api_key = st.secrets['OPENAI_API_KEY']
+#openai_api_key = st.secrets['OPENAI_API_KEY']
 endpoint_url = "https://probe.stad.gent/sparql"
 
-# with st.sidebar:
-#     openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
-#     "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
-#     "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
-#     "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
+with st.sidebar:
+    openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+    "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+    "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
+    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
 
 with open('questions_and_queries.json', 'r', encoding='utf-8') as file:
     example_data = json.load(file)
@@ -49,7 +49,7 @@ def generate_sparql_query(user_question, label_data, examples_data):
 
     But please make sure to use the URIs of the chosen labels in the "?annotation oa:hasBody" part of the query like in the examples.
     
-    If the user doesn't set a limit to the number of decisions they want to see, limit them to 5.
+    If the user doesn't set a limit to the number of decisions they want to see, limit them to 3.
     
     If there is more than one URI, you can separate them with a comma.
     

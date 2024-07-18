@@ -116,8 +116,8 @@ def run_query(query):
 
         return cleaned_decisions
 
-st.title("💬 Chatbot")
-st.caption("🚀 A Streamlit chatbot powered by OpenAI")
+st.title("💬 ChatGent")
+st.caption("🚀 Answering questions about decisions made by the city of Gent")
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 
@@ -189,6 +189,9 @@ if prompt := st.chat_input():
     Show the {resources} to the end-user so they can refer to them. Format the links where the {resources_names} are shown as links being {resources}.
 
     If you don't have any answer or potential resources from the decisions which are results of the query, don't refer to any external links (including the city of Gent's website).
+
+    Don't show empty lists in your answer. 
+    Use the word "besluiten" instead of "beslissingen".
     """
 
     completion_2 = client.chat.completions.create(

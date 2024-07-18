@@ -143,12 +143,12 @@ if prompt := st.chat_input():
 
     {user_question}
 
-    Based on the following data only, generate a response that answers their question, don't hallucinate:
+    Based on the following data which is retrieved decisions only (ONLY THEM), generate a response that answers their question, don't hallucinate:
 
     Data: {cleaned_decisions}
     Answer in the language the user asked in. Be sure to be friendly and explain in a way an ordinary person can understand. The language city officials use is often very different from the language citizens use (officials wind up speaking in departments and form numbers instead of needs in big organizations).
 
-    Show the resources to the end-user so they can refer to them. Format the links where the {resources_names} are shown as links being {resources}
+    Show the {resources} to the end-user so they can refer to them. Format the links where the {resources_names} are shown as links being {resources}.
     """
 
     completion_2 = client.chat.completions.create(

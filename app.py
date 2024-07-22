@@ -3,15 +3,18 @@ import json
 import requests
 import streamlit as st
 import re
+from datetime import date
+import time
 
-openai_api_key = st.secrets['OPENAI_API_KEY']
+# openai_api_key = st.secrets['OPENAI_API_KEY']
 endpoint_url = "https://probe.stad.gent/sparql"
+today = date.today()
 
-# with st.sidebar:
-#     openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
-#     "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
-#     "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
-#     "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
+with st.sidebar:
+    openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+    "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+    "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
+    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
 
 with open('questions_and_queries.json', 'r', encoding='utf-8') as file:
     example_data = json.load(file)
@@ -20,6 +23,8 @@ with open('annotations_2.json', 'r', encoding='utf-8') as file:
     label_data = json.load(file)
 
 def generate_sparql_query(user_question, label_data, examples_data):
+    with st.spinner('Wait for it...'):
+        time.sleep(5)
     concepts_and_labels = "\n".join(
         f"URI of Label: {pair['uri']}\nLabel: {pair['label']}\n" for pair in label_data
     )
@@ -59,9 +64,11 @@ def generate_sparql_query(user_question, label_data, examples_data):
     Don't add '`' as you wish.
 
     Then after filtering on label, add a filter for the title or description or motivering with keywords that you extract from the question.
+
     """
     response = client.chat.completions.create(
             model="gpt-3.5-turbo",
+            #model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that generates SPARQL queries to be run on a SPARQL endpoint containing data about decisions of the city of Gent based on user questions and labels of decisions related to their questions. Your language is Dutch."},
                 {"role": "user", "content": prompt}
@@ -80,6 +87,7 @@ def check_sparql_query(query):
     """
     response_2 = client.chat.completions.create(
             model="gpt-3.5-turbo",
+            #model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a SPARQL query refiner."},
                 {"role": "user", "content": prompt}
@@ -127,7 +135,7 @@ if "messages" not in st.session_state:
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
-if prompt := st.chat_input():
+if prompt := st.chat_input("Stel hier uw vraag..."):
     if not openai_api_key:
         st.info("Please add your OpenAI API key to continue.")
         st.stop()
@@ -176,31 +184,51 @@ if prompt := st.chat_input():
         resources.append(d['derivedFrom'])
         resources_names.append(d['title'])
 
+    # prompt_2 = f"""
+    # If the user's prompt is not a question, chat normally. If it is a question do the following:
+
+    #     The following is the question the user asked: {user_question}
+    #     Based on the following data: {cleaned_decisions}, which is retrieved decisions only (ONLY THEM), generate a response that answers their question, don't hallucinate!
+
+    #     But before showing your answer to the user, check if it matches the user's question: {user_question}. If it relates but doesn't answer exactly mention that "it might relate but isn't necessarily the answer they want".
+    #     Show the resources: {resources} to the end-user so they can refer to them. Format the links where the {resources_names} are shown as links which are the {resources}.
+
+    # IMPORTANT NOTES TO TAKE INTO ACCOUNT:
+    #     - If you don't have any answer or potential resources from the decisions, don't refer to any external links (including the city of Gent's website).
+    #     - Don't show empty lists in your answer. 
+    #     - Use the word "besluiten" instead of "beslissingen" when referring to decisions.
+    #     - Answer in the language the user asked in.
+    #     - For questions about dates of events: take into account the current year. So if it's 2024, you answer for 2024 and not 2023 unless they ask for a specific year like 2023.
+    #     - Be friendly and explain in a way an ordinary person can understand. The language city officials use is often very different from the language citizens use (officials wind up speaking in departments and form numbers instead of needs in big organizations).
+    # """
+
     prompt_2 = f"""
-    If the user's prompt is not a question, chat normally. If it is a question do the following:
+    If the user's prompt is not a question, chat normally. If it is a question, follow these steps:
 
-    The following is the question the user asked:
+    1. User's question: {user_question}
+    2. Data (retrieved decisions only): {cleaned_decisions}
+    3. You can refer to resources of relevance on https://stad.gent
 
-    {user_question}
+    Generate a response that answers their question without hallucinating. 
 
-    Based on the following data which is retrieved decisions only (ONLY THEM), generate a response that answers their question, don't hallucinate:
+    IMPORTANT NOTES:
+    - If you don't have an answer or potential resources from the decisions, don't refer to any external links (including the city of Gent's website).
+    - Don't show empty lists in your answer.
+    - Use "besluiten" instead of "beslissingen" for decisions.
+    - Answer in the language the user asked in.
+    - Make sure to answer in the context of the current date: {today}, unless a specific year is mentioned.
+    - If the retrieved decisions' dates don't match the current date in year {today}, mention that they are old.
+    - Be friendly and explain in plain language, avoiding bureaucratic terms.
+    
+    Before showing your answer, ensure it matches the user's question:
+    - If it relates but doesn't answer exactly, mention: "It might relate but isn't necessarily the answer they want."
+    - Provide the resources: {resources}, formatted with the {resources_names} as links ({resources}).
 
-    Data: {cleaned_decisions}
-
-    But before showing your answer to the user, check if it matches the user's question: {user_question}. If it relates but doesn't answer exactly mention that it might relate but isn't necessarily the answer.
-
-    Show the {resources} to the end-user so they can refer to them. Format the links where the {resources_names} are shown as links being {resources}.
-
-    If you don't have any answer or potential resources from the decisions which are results of the query, don't refer to any external links (including the city of Gent's website).
-
-    Don't show empty lists in your answer. 
-    Use the word "besluiten" instead of "beslissingen".
-
-    IMPORTANT NOTE: Answer in the language the user asked in. Be sure to be friendly and explain in a way an ordinary person can understand. The language city officials use is often very different from the language citizens use (officials wind up speaking in departments and form numbers instead of needs in big organizations).
     """
 
     completion_2 = client.chat.completions.create(
     model="gpt-3.5-turbo",
+    #model="gpt-4o-mini",
     messages=[
         {"role": "system", "content": "You are a helpful assistant for the citizens of Gent when they ask a question on the city's website regarding the decisions made by the city. Be friendly, speak in easy to use terms. You use both the user's question and relevant decisions passed to you."},
         {"role": "user", "content": prompt_2}

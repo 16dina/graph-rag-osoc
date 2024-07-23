@@ -136,7 +136,7 @@ def run_query(query):
 st.title("💬 ChatGent")
 st.caption("🚀 Answering questions about decisions made by the city of Gent")
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
+    st.session_state["messages"] = [{"role": "assistant", "content": "Hoe kan ik u helpen?"}]
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])

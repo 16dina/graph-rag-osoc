@@ -54,7 +54,6 @@ def generate_sparql_query(user_question, label_data, examples_data):
     SPARQL Query:
 
     But please make sure to use the URIs of the chosen labels in the "?annotation oa:hasBody" part of the query like in the examples.
-    ALSO: use the UNION like in the example queries when looking up decisions from different labels.
     
     If the user doesn't set a limit to the number of decisions they want to see, limit them to 3.
 
@@ -134,7 +133,7 @@ def run_query(query):
         return cleaned_decisions
 
 st.title("💬 ChatGent")
-st.caption("🚀 Answering questions about decisions made by the city of Gent")
+st.caption("🚀 Vragen beantwoorden over besluiten van de stad Gent")
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "Hoe kan ik u helpen?"}]
 

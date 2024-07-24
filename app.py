@@ -7,16 +7,16 @@ from datetime import date
 import time
 
 ## OPENAI_API_KEY is defined in the secrets in StreamLit
-#openai_api_key = st.secrets['OPENAI_API_KEY']
+openai_api_key = st.secrets['OPENAI_API_KEY']
 endpoint_url = "https://probe.stad.gent/sparql"
 today = date.today()
 
 ## uncomment to test out with local host
-with st.sidebar:
-    openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
-    "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
-    "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
-    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
+# with st.sidebar:
+#     openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+#     "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+#     "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
+#     "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
 
 with open('questions_and_queries.json', 'r', encoding='utf-8') as file:
     example_data = json.load(file)

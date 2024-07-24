@@ -209,19 +209,20 @@ if prompt := st.chat_input("Stel hier uw vraag..."):
         2. Data (retrieved decisions only): {cleaned_decisions}
         3. You can refer to resources of relevance on https://stad.gent but only there. Don't surf online.
 
-        Generate a response that answers their question without hallucinating. Answer in the language the user asked in (For example, if they ask in English, answer in English).
+        Generate a response that answers their question without hallucinating. 
+        Answer in the language the user asked in (For example, if they ask in English, answer in English).
 
         IMPORTANT NOTES:
-        - If the retrieved decisions' dates don't match the current date in year {today}, you must tell the user that they are old.
+        - If the retrieved decisions' dates don't match the current date in year {today}, mention that they are old.
         - If you don't have an answer or potential resources from the decisions, don't refer to any external links.
         - Don't show empty lists in your answer.
         - Use "besluiten" instead of "beslissingen" for decisions.
         - Make sure to answer in the context of the year of the current date: {today}, unless a specific year is mentioned.
         - Be friendly and explain in plain language, avoiding bureaucratic terms.
-        
+
         Before showing your answer, ensure it matches the user's question:
         - If it relates but doesn't answer exactly, mention: "It might relate but isn't necessarily the answer you want."
-        - Provide the resources: {resources}, formatted with the {resources_names} as links ({resources}).
+        - Provide the resources in bullet points: {resources}, formatted with the {resources_names} as links ({resources}).
 
         """
         

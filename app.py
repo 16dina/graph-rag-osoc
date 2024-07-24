@@ -7,16 +7,16 @@ from datetime import date
 import time
 
 ## OPENAI_API_KEY is defined in the secrets in StreamLit
-openai_api_key = st.secrets['OPENAI_API_KEY']
+#openai_api_key = st.secrets['OPENAI_API_KEY']
 endpoint_url = "https://probe.stad.gent/sparql"
 today = date.today()
 
 ## uncomment to test out with local host
-# with st.sidebar:
-#     openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
-#     "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
-#     "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
-#     "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
+with st.sidebar:
+    openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+    "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+    "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
+    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
 
 with open('questions_and_queries.json', 'r', encoding='utf-8') as file:
     example_data = json.load(file)
@@ -53,13 +53,11 @@ def generate_sparql_query(user_question, label_data, examples_data):
     User Question: {user_question}
     SPARQL Query:
 
-    But please make sure to use the URIs of the chosen labels in the "?annotation oa:hasBody" part of the query like in the examples.
+    But please make sure to use the URIs of the chosen labels in the "?annotation oa:hasBody" part of the query like in the examples. If there is more than one label chosen query for them using the same structure in the second example query in {example_queries}. This utilizes VALUES.
     
     If the user doesn't set a limit to the number of decisions they want to see, limit them to 3.
 
     Always choose the most recent decision (by ordering on publication date "eli:date_publication") unless prompted otherwise by the user.
-    
-    If there is more than one URI, you can separate them with a comma.
     
     Don't add '`' as you wish.
 
@@ -67,8 +65,8 @@ def generate_sparql_query(user_question, label_data, examples_data):
 
     """
     response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            #model="gpt-4o-mini",
+            #model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that generates SPARQL queries to be run on a SPARQL endpoint containing data about decisions of the city of Gent based on user questions and labels of decisions related to their questions. Your language is Dutch."},
                 {"role": "user", "content": prompt}
@@ -86,8 +84,8 @@ def check_sparql_query(query):
     Don't add '`' to the query as you wish.
     """
     response_2 = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            #model="gpt-4o-mini",
+            #model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a SPARQL query refiner."},
                 {"role": "user", "content": prompt}
@@ -159,23 +157,19 @@ if prompt := st.chat_input("Stel hier uw vraag..."):
         if prefix_position != -1:
             query_content = query_content[prefix_position:]
 
-        query_content_no_newlines = query_content.replace("\n", " ")
-
-
-        cleaned_decisions = run_query(query_content_no_newlines)
+        cleaned_decisions = run_query(query_content)
         print(cleaned_decisions)
 
         if not cleaned_decisions:
-            sparql_query_2 = check_sparql_query(query_content_no_newlines)
+            sparql_query_2 = check_sparql_query(query_content)
             query_content_2 = sparql_query_2.choices[0].message.content
             prefix_position = query_content.find("PREFIX")
             if prefix_position != -1:
                 query_content_2 = query_content_2[prefix_position:]
 
-            query_content_no_newlines_2 = query_content_2.replace("\n", " ")
-            print("SECOND SPARQL:", query_content_no_newlines_2)
+            print("SECOND SPARQL:", query_content_2)
 
-            cleaned_decisions = run_query(query_content_no_newlines_2)
+            cleaned_decisions = run_query(query_content_2)
             print("AGAIN:", cleaned_decisions)
         
         resources = []
@@ -215,15 +209,14 @@ if prompt := st.chat_input("Stel hier uw vraag..."):
         2. Data (retrieved decisions only): {cleaned_decisions}
         3. You can refer to resources of relevance on https://stad.gent but only there. Don't surf online.
 
-        Generate a response that answers their question without hallucinating. 
+        Generate a response that answers their question without hallucinating. Answer in the language the user asked in (For example, if they ask in English, answer in English).
 
         IMPORTANT NOTES:
+        - If the retrieved decisions' dates don't match the current date in year {today}, you must tell the user that they are old.
         - If you don't have an answer or potential resources from the decisions, don't refer to any external links.
         - Don't show empty lists in your answer.
         - Use "besluiten" instead of "beslissingen" for decisions.
-        - Answer in the language the user asked in.
         - Make sure to answer in the context of the year of the current date: {today}, unless a specific year is mentioned.
-        - If the retrieved decisions' dates don't match the current date in year {today}, mention that they are old.
         - Be friendly and explain in plain language, avoiding bureaucratic terms.
         
         Before showing your answer, ensure it matches the user's question:

@@ -188,9 +188,10 @@ if prompt := st.chat_input("Stel hier uw vraag..."):
         1. User's question: {user_question}
         2. Data to use for answer: {cleaned_decisions}
 
-        YOUR ROLE: 
-        - You answer the user's question. However, chat normally if the user's prompt is not a question.
-        - You answer in the language the user asked in. For example,if they ask in English, you answer in English, and if they ask in Dutch, you answer in Dutch.
+        YOUR ROLE: You answer the user's question. However, chat normally if the user's prompt is not a question.
+
+        Generate a response that answers their question without hallucinating. 
+        Answer in the language the user asked in (For example, if they ask in English, answer in English).
 
         INSTRUCTIONS:
         - If it is a question, generate a response using ONLY the given data.
